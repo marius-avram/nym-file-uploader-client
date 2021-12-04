@@ -1,0 +1,11 @@
+.homepageWrapper {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bigIconSize {
+    font-size: 30px;
+    color: #40a9ff;
+    margin-bottom: 5px;
+}
