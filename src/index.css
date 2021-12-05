@@ -16,3 +16,34 @@ code {
 #root {
     height: 100%;
 }
+
+.ant-upload-list-text-container {
+  background-color: #fafafa;
+  padding-bottom: 10px;
+  margin-top: 10px;
+}
+
+.ant-upload-list-item-progress {
+  color: black;
+}
+
+.ant-progress-line {
+  width: 98% !important;
+}
+.ant-progress-inner {
+  background-color: #00000073 !important;
+}
+
+.ant-tabs-nav {
+  margin: 0 !important;
+}
+
+.ant-tabs-tab {
+  border-radius: 2px;
+  background-color: #fafafa !important;
+  padding: 12px !important;
+}
+
+.ant-tabs-tab + .ant-tabs-tab {
+  margin: 0 0 0 12px !important;
+}
