@@ -11,16 +11,17 @@
     "@testing-library/user-event": "^12.1.10",
     "@types/bs58": "^4.0.1",
     "@types/jest": "^26.0.15",
+    "@types/md5": "^2.3.1",
     "@types/node": "^12.0.0",
     "@types/websocket": "^1.0.4",
     "antd": "^4.17.2",
     "bs58": "^4.0.1",
     "encrypt-uint8array": "^1.0.0",
+    "md5": "^2.3.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "typescript": "^4.1.2",
-    "wasm-themis": "^0.13.11",
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {

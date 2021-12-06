@@ -13,7 +13,7 @@ const { Dragger } = Upload;
 export function FileUploader() {
   const { addOperationToBuffer } = FileServiceProviderOps();
   const { encryptArray } = CryptoOps()
-  const { connection, sendSelfAddressRequest, sendBinaryMessageToMixNet} = MixnetHook();
+  const { connection, sendSelfAddressRequest, sendBinaryMessageToMixNet, onBinaryMessageFromMixNet } = MixnetHook();
 
   useEffect(() => {
     if (connection != null) {
@@ -25,14 +25,16 @@ export function FileUploader() {
     multiple: false,
     customRequest: (options: UploadRequestOption) => {
         const { onSuccess, onError, file, onProgress } = options;
-
+        // Initialise response handler
+        onBinaryMessageFromMixNet();
+        // Send message with the encrypted file
         (file as Blob)
           .arrayBuffer()
           .then((arrayBuffer : ArrayBuffer) => {
-              encryptArray(new Uint8Array(arrayBuffer), "superprotective");
-                const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, arrayBuffer);
+              encryptArray(new Uint8Array(arrayBuffer), "superprotective").then((encryptedArray: ArrayBuffer) => {
+                const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, encryptedArray);
                 sendBinaryMessageToMixNet(arrayBufferWithOp);
-              //})
+              });
           });
     },
     onDrop(e: React.DragEvent<HTMLDivElement>) {

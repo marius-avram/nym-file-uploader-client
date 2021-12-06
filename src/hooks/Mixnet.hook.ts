@@ -82,10 +82,19 @@ export function MixnetHook() {
     }
   }, [buildSendBinaryRequest, connection]);
 
+  const onBinaryMessageFromMixNet = useCallback(() => {
+    if (connection != null) {
+      connection.onmessage = (event: MessageEvent) => {
+        console.log("received message back");
+        console.log(event.data);
+      }
+    }
+  }, [connection]);
 
   return {
     connection: connection,
     sendSelfAddressRequest: sendSelfAddressRequest,
-    sendBinaryMessageToMixNet: sendBinaryMessageToMixNet
+    sendBinaryMessageToMixNet: sendBinaryMessageToMixNet,
+    onBinaryMessageFromMixNet: onBinaryMessageFromMixNet
   }
 }
