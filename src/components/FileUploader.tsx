@@ -6,11 +6,13 @@ import {faUpload } from '@fortawesome/free-solid-svg-icons'
 import { UploadRequestOption } from 'rc-upload/lib/interface';
 import { MixnetHook } from '../hooks/Mixnet.hook';
 import { FileServiceProviderOps, Operations } from '../hooks/FileServiceProviderOps.hook';
+import CryptoOps from '../hooks/CryptoOps.hook';
 
 const { Dragger } = Upload;
 
 export function FileUploader() {
   const { addOperationToBuffer } = FileServiceProviderOps();
+  const { encryptArray } = CryptoOps()
   const { connection, sendSelfAddressRequest, sendBinaryMessageToMixNet} = MixnetHook();
 
   useEffect(() => {
@@ -27,8 +29,10 @@ export function FileUploader() {
         (file as Blob)
           .arrayBuffer()
           .then((arrayBuffer : ArrayBuffer) => {
-              const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, arrayBuffer);
-              sendBinaryMessageToMixNet(arrayBufferWithOp);
+              encryptArray(new Uint8Array(arrayBuffer), "superprotective");
+                const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, arrayBuffer);
+                sendBinaryMessageToMixNet(arrayBufferWithOp);
+              //})
           });
     },
     onDrop(e: React.DragEvent<HTMLDivElement>) {

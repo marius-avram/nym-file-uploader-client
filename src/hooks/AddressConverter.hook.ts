@@ -15,7 +15,7 @@ export default function AddressConverter() {
     base58CompleteAddress.set(new Uint8Array(base58.decode(gatewayAddress)), 64)
     return base58CompleteAddress;
   }
-  
+
   return {
     fromStringToBase58: fromStringToBase58
   }

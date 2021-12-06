@@ -4505,6 +4505,13 @@ encodeurl@~1.0.2:
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
 
+encrypt-uint8array@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/encrypt-uint8array/-/encrypt-uint8array-1.0.0.tgz#3706ca8e0fed01a498fdb2107dab698c71ac52c4"
+  integrity sha512-y4tP35IAADG8s+AbCqnw5J2zL+eWxyZvKBfbSVbmz34X7QlcFcryBcn6MQgj6LR+KpeW+A7CECcyemG2yz4rdg==
+  dependencies:
+    wasm-themis "^0.13.1"
+
 end-of-stream@^1.0.0, end-of-stream@^1.1.0:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.4.tgz#5ae64a5f45057baf3626ec14da0ca5e4b2431eb0"
@@ -11587,6 +11594,11 @@ warning@^4.0.1:
   integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
+
+wasm-themis@^0.13.1, wasm-themis@^0.13.11:
+  version "0.13.11"
+  resolved "https://registry.yarnpkg.com/wasm-themis/-/wasm-themis-0.13.11.tgz#da504f8f03416d7099fbb11a16d2e01ea305c47a"
+  integrity sha512-xnHfCORQ3vZgscOYqkQwmlw2YXusTLfBAU/J9DUG+iE9iqU0vk7iMFWLu2Pmlywn5h7w6g0DAXIM2+6mXIrlwg==
 
 watchpack-chokidar2@^2.0.1:
   version "2.0.1"
