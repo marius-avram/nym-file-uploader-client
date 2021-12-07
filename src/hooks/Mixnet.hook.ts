@@ -10,26 +10,26 @@ export function MixnetHook() {
   const SELF_ADDRESS_REQUEST_TAG = 0x02
   const WITH_REPLY_SURB = 0x01;
 
-  const [connection, setConnection] = useState<WebSocket>();
   const [binaryResponse, setBinaryResponse] = useState<ArrayBuffer>();
+  const [connectionInitialised, setConnectionInitialised] = useState<boolean>(false)
 
   const connectWebsocket = useCallback(() => {
-    if (connection === undefined) {
+    if (window.CONNECTION === undefined) {
+      console.log("undefined");
       var server = new WebSocket(Config.nymClientUrl);
       server.onopen = function () {
-          console.debug("Connection to Websocket initialised");
-          setConnection(server);
+          console.debug("window.CONNECTION to Websocket initialised");
+          window.CONNECTION = server;
+          setConnectionInitialised(true);
       };
       server.onerror = function (err) {
-          console.error("Failed to establish connection with Websocket " + err)
+          console.error("Failed to establish window.CONNECTION with Websocket " + err)
       };
     }
-  }, [connection]);
-
-  // This has a effect that if imported in too many places it will initialise multiple socket connections
-  useEffect(() => {
-    connectWebsocket();
-  }, [connectWebsocket])
+    else {
+      setConnectionInitialised(true);
+    }
+  }, [setConnectionInitialised]);
 
   // utility function to convert number to byte array, big-endian order
   const numberToBytesArray = (n: number, maxLength: number) : Uint8Array => {
@@ -70,25 +70,25 @@ export function MixnetHook() {
   }, []);
 
   const sendSelfAddressRequest = useCallback(() => {
-    if (connection != null) {
+    if (window.CONNECTION != null) {
       const request = buildSelfAddressRequest();
-      connection.send(request)
+      window.CONNECTION.send(request)
     }
-  }, [buildSelfAddressRequest, connection])
+  }, [buildSelfAddressRequest, connectionInitialised])
 
   const sendBinaryMessageToMixNet = useCallback((arrayBuffer: ArrayBuffer) => {
-    if (connection != null) {
+    if (window.CONNECTION != null) {
       const request = buildSendBinaryRequest(arrayBuffer);
-      connection.send(request)
+      window.CONNECTION.send(request)
     }
-  }, [buildSendBinaryRequest, connection]);
+  }, [buildSendBinaryRequest, connectionInitialised]);
 
   const setOnBinaryMessageFromMixNet = useCallback((eventHandler: (ev: MessageEvent) => any) => {
-    if (connection != null) {
+    if (window.CONNECTION != null) {
       console.debug("initialised message listener");
-      connection.onmessage = eventHandler;
+      window.CONNECTION.onmessage = eventHandler;
     }
-  }, [connection]);
+  }, [connectionInitialised]);
 
   const waitForBinaryReply = useCallback(() => {
     setOnBinaryMessageFromMixNet((event: MessageEvent) => {
@@ -101,7 +101,8 @@ export function MixnetHook() {
   }, [setOnBinaryMessageFromMixNet, setBinaryResponse]);
 
   return {
-    connection: connection,
+    connectionInitialised: connectionInitialised,
+    connectWebsocket: connectWebsocket,
     binaryResponse: binaryResponse,
     sendSelfAddressRequest: sendSelfAddressRequest,
     sendBinaryMessageToMixNet: sendBinaryMessageToMixNet,

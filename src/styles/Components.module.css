@@ -6,8 +6,17 @@
 
 .bigIconSize {
   font-size: 30px;
-  color: #40a9ff;
+  color: #1890ff;
   margin-bottom: 5px;
+}
+
+.bigCustomButton {
+  height: 45px;
+  margin-bottom: 10px;
+}
+
+.mediumIconSize {
+  font-size: 16px;
 }
 
 .toggleWrapper {
@@ -19,4 +28,60 @@
 
 .pullTextRight {
   text-align: right;
+}
+
+.listWrapper {
+    height: 480px;
+    overflow-y: auto;
+    background-color: #fafafa
+}
+
+.listItemRow {
+  width: 100%;
+  text-align: left;
+  margin-left: -2px;
+  margin-top: 10px;
+}
+
+.greenColor {
+  color: #006622;
+}
+
+.redColor {
+  color: #990000;
+}
+
+.customFooter {
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  text-align: left;
+  padding: 15px;
+  padding-left: 20px;
+}
+
+.customButton {
+  height: 35px;
+  margin-right: 3px;
+  margin-top: -20px;
+}
+
+.greyBorderTop {
+  border-top: 1px solid #f0f0f0;
+}
+
+.padding12 {
+  padding: 12px;
+}
+
+.statusText {
+  color: #fff;
+  font-weight: 600;
+  max-width: 100px;
+  float: left;
+}
+
+.settingsIcon {
+  float: right;
+  color: #f0f0f0;
+  max-width: 100px;
 }
