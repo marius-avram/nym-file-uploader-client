@@ -7,13 +7,14 @@ import { UploadRequestOption } from 'rc-upload/lib/interface';
 import { MixnetHook } from '../hooks/Mixnet.hook';
 import { FileServiceProviderOps, Operations } from '../hooks/FileServiceProviderOps.hook';
 import CryptoOps from '../hooks/CryptoOps.hook';
+import md5 from 'md5';
 
 const { Dragger } = Upload;
 
 export function FileUploader() {
   const { addOperationToBuffer } = FileServiceProviderOps();
-  const { encryptArray } = CryptoOps()
-  const { connection, sendSelfAddressRequest, sendBinaryMessageToMixNet, onBinaryMessageFromMixNet } = MixnetHook();
+  const { encryptArray, decryptArray } = CryptoOps()
+  const { connection, binaryResponse, sendSelfAddressRequest, sendBinaryMessageToMixNet, waitForBinaryReply } = MixnetHook();
 
   useEffect(() => {
     if (connection != null) {
@@ -21,21 +22,47 @@ export function FileUploader() {
     }
   }, [connection, sendSelfAddressRequest]);
 
+  // Handler for receiving a file binary content
+  useEffect(() => {
+    if (binaryResponse != null) {
+      decryptArray(new Uint8Array(binaryResponse), "superprotective").then((decryptedArray: ArrayBuffer) => {
+        createDownloadLink(decryptedArray)
+      });
+    }
+  }, [binaryResponse, decryptArray])
+
+
+  const createDownloadLink = (arrayBuffer: ArrayBuffer) => {
+    const fileBlob = new  Blob([new Uint8Array(arrayBuffer)]);
+    const downloadContainer = document.getElementById('downloadContainer');
+    const a = document.createElement('a');
+    const url = window.URL.createObjectURL(fileBlob);
+    a.href = url;
+    a.text = "Download file here";
+    a.download = 'received_filename';
+    if (downloadContainer?.firstChild != null) {
+      downloadContainer.removeChild(downloadContainer.childNodes[0])
+    }
+    downloadContainer?.appendChild(a);
+  }
+
   const props = {
     multiple: false,
     customRequest: (options: UploadRequestOption) => {
-        const { onSuccess, onError, file, onProgress } = options;
-        // Initialise response handler
-        onBinaryMessageFromMixNet();
-        // Send message with the encrypted file
-        (file as Blob)
-          .arrayBuffer()
-          .then((arrayBuffer : ArrayBuffer) => {
-              encryptArray(new Uint8Array(arrayBuffer), "superprotective").then((encryptedArray: ArrayBuffer) => {
-                const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, encryptedArray);
-                sendBinaryMessageToMixNet(arrayBufferWithOp);
-              });
+      const { onSuccess, onError, file, onProgress } = options;
+      // Initialise response handler
+      waitForBinaryReply();
+      // Send message with the encrypted file
+      (file as Blob)
+        .arrayBuffer()
+        .then((arrayBuffer : ArrayBuffer) => {
+          encryptArray(new Uint8Array(arrayBuffer), "superprotective").then((encryptedArray: ArrayBuffer) => {
+            const fileMd5Sum = md5(new Uint8Array(encryptedArray));
+            console.log("fileMd5Sum " + fileMd5Sum);
+            const arrayBufferWithOp = addOperationToBuffer(Operations.WRITE_ENCRYPTED_FILE, encryptedArray);
+            sendBinaryMessageToMixNet(arrayBufferWithOp);
           });
+        });
     },
     onDrop(e: React.DragEvent<HTMLDivElement>) {
       console.debug('Dropped files', e.dataTransfer.files);
@@ -43,7 +70,7 @@ export function FileUploader() {
   };
 
   const onEncryptionChange = () => {
-    console.log("toggled button");
+    console.log("toggled encryption button");
   }
 
   return <>
@@ -76,6 +103,7 @@ export function FileUploader() {
             Support for a single upload
         </p>
       </Dragger>
+      <div id="downloadContainer"></div>
     </div>
    
   </>

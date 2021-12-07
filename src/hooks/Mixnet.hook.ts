@@ -11,6 +11,7 @@ export function MixnetHook() {
   const WITH_REPLY_SURB = 0x01;
 
   const [connection, setConnection] = useState<WebSocket>();
+  const [binaryResponse, setBinaryResponse] = useState<ArrayBuffer>();
 
   const connectWebsocket = useCallback(() => {
     if (connection === undefined) {
@@ -82,19 +83,29 @@ export function MixnetHook() {
     }
   }, [buildSendBinaryRequest, connection]);
 
-  const onBinaryMessageFromMixNet = useCallback(() => {
+  const setOnBinaryMessageFromMixNet = useCallback((eventHandler: (ev: MessageEvent) => any) => {
     if (connection != null) {
-      connection.onmessage = (event: MessageEvent) => {
-        console.log("received message back");
-        console.log(event.data);
-      }
+      console.debug("initialised message listener");
+      connection.onmessage = eventHandler;
     }
   }, [connection]);
 
+  const waitForBinaryReply = useCallback(() => {
+    setOnBinaryMessageFromMixNet((event: MessageEvent) => {
+      const message = (event.data as Blob);
+      message.arrayBuffer().then((arrayBuffer: ArrayBuffer) => {
+        const reicevedBinaryResponse = arrayBuffer.slice(10);
+        setBinaryResponse(reicevedBinaryResponse);
+      });
+    });
+  }, [setOnBinaryMessageFromMixNet, setBinaryResponse]);
+
   return {
     connection: connection,
+    binaryResponse: binaryResponse,
     sendSelfAddressRequest: sendSelfAddressRequest,
     sendBinaryMessageToMixNet: sendBinaryMessageToMixNet,
-    onBinaryMessageFromMixNet: onBinaryMessageFromMixNet
+    setOnBinaryMessageFromMixNet: setOnBinaryMessageFromMixNet,
+    waitForBinaryReply: waitForBinaryReply
   }
 }
