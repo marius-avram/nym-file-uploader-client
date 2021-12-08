@@ -45,7 +45,7 @@ export default function EncryptedFilesList() {
 
   const disableDownloadLink = useCallback(() => {
     setDownloadUrl('');
-    setSelectedFilename('');
+    setSelectedFilename(undefined);
   }, [setDownloadUrl, setSelectedFilename]);
 
   const handleReceivingFile = useCallback(() => {
@@ -127,10 +127,10 @@ export default function EncryptedFilesList() {
       </Modal>
     </div>
     <div className={styles.customFooter}>
-        {selectedFilename &&
+        {selectedFilename != undefined && downloadUrl != '' &&
           <a href={downloadUrl} download={selectedFilename} onClick={disableDownloadLink}>Press here to save it locally</a>
         }
-        {!selectedFilename &&
+        {selectedFilename == undefined && downloadUrl == '' &&
           <span>Download the files from the NYM service provider</span>
         }
     </div>
