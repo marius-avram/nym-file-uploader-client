@@ -7,26 +7,31 @@ import { LocalStorageOps } from '../hooks/LocalStorageOps';
 import { MixnetHook } from '../hooks/Mixnet.hook';
 import { FileServiceProviderOps, Operations } from '../hooks/FileServiceProviderOps.hook';
 import CryptoOps from '../hooks/CryptoOps.hook';
+import { useAppContext } from '../App.context';
 
 export default function EncryptedFilesList() {
+  const { state: appState } = useAppContext();
   const { addOperationToBuffer } = FileServiceProviderOps();
   const { decryptArray } = CryptoOps();
   const { binaryResponse, sendBinaryMessageToMixNet, waitForBinaryReply, setOnBinaryMessageFromMixNet } = MixnetHook();
-  const { updatedCount: fileListUpdatedCount, getSavedFiles, removeMd5Sum } = LocalStorageOps();
+  const { getSavedFiles, removeMd5Sum } = LocalStorageOps();
 
   const [items, setItems] = useState<Array<string>>();
+  const [selectedFilename, setSelectedFilename] = useState<string>();
+  const [downloadUrl, setDownloadUrl] = useState<string>('');
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [itemToBeDeleted, setItemToBeDeleted] = useState<string>('');
 
   /// Every time the local storage changes we reload the items from the state of this component
   useEffect(() => {
+    console.debug("updated fileListUpdatCount");
     const filesMetadata = getSavedFiles();
     const localItems = [];
     for (const [md5sum, datestr] of Object.entries(filesMetadata)) {
       localItems.push(md5sum + " created @ " + datestr);
     }
     setItems(localItems);
-  }, []);
+  }, [appState.fileListUpdatedCount]);
 
   // Handler for receiving a file binary content
   useEffect(() => {
@@ -35,17 +40,13 @@ export default function EncryptedFilesList() {
 
   const createDownloadLink = useCallback((arrayBuffer: ArrayBuffer) => {
     const fileBlob = new  Blob([new Uint8Array(arrayBuffer)]);
-    const downloadContainer = document.getElementById('downloadContainer');
-    const a = document.createElement('a');
-    const url = window.URL.createObjectURL(fileBlob);
-    a.href = url;
-    a.text = "Press here to save it locally";
-    a.download = 'received_filename';
-    if (downloadContainer?.firstChild != null) {
-      downloadContainer.removeChild(downloadContainer.childNodes[0]);
-    }
-    downloadContainer?.appendChild(a);
-  }, []);
+    setDownloadUrl(window.URL.createObjectURL(fileBlob));
+  }, [setDownloadUrl]);
+
+  const disableDownloadLink = useCallback(() => {
+    setDownloadUrl('');
+    setSelectedFilename('');
+  }, [setDownloadUrl, setSelectedFilename]);
 
   const handleReceivingFile = useCallback(() => {
     if (binaryResponse != null) {
@@ -66,13 +67,14 @@ export default function EncryptedFilesList() {
   const initDownloadFile = useCallback((item: string) => {
     console.debug("initDownloadFile");
     const md5sum = getMd5FromItem(item);
+    setSelectedFilename(md5sum);
     const textEncoder = new TextEncoder();
     const arrayBuffer = textEncoder.encode(md5sum);
     const arrayBufferWithOp = addOperationToBuffer(Operations.READ_ENCRYPTED_FILE, arrayBuffer);
     // Initialise response handler
     waitForBinaryReply();
     sendBinaryMessageToMixNet(arrayBufferWithOp);
-  }, [getMd5FromItem, waitForBinaryReply, sendBinaryMessageToMixNet]);
+  }, [getMd5FromItem, setSelectedFilename, waitForBinaryReply, sendBinaryMessageToMixNet]);
 
   const openDeleteModal = useCallback((item : string) => {
     const md5sum = getMd5FromItem(item);
@@ -81,13 +83,18 @@ export default function EncryptedFilesList() {
   }, [setItemToBeDeleted, setIsModalVisible])
 
   const handleModalCancel = useCallback(() => {
-    console.log("cancel");
     setIsModalVisible(false);
   }, [setIsModalVisible]);
 
   const removeItem = useCallback(() => {
     console.debug("delete from local storage");
     removeMd5Sum(itemToBeDeleted);
+    console.debug("sending delete message to mixnet");
+    const textEncoder = new TextEncoder();
+    const arrayBuffer = textEncoder.encode(itemToBeDeleted);
+    const arrayBufferWithOp = addOperationToBuffer(Operations.DELETE_ENCRYPTED_FILE, arrayBuffer);
+    sendBinaryMessageToMixNet(arrayBufferWithOp);
+    setIsModalVisible(false);
   }, [itemToBeDeleted])
 
   return <>
@@ -120,7 +127,12 @@ export default function EncryptedFilesList() {
       </Modal>
     </div>
     <div className={styles.customFooter}>
-      <span id="downloadContainer">Download the files from the NYM service provider</span>
+        {selectedFilename &&
+          <a href={downloadUrl} download={selectedFilename} onClick={disableDownloadLink}>Press here to save it locally</a>
+        }
+        {!selectedFilename &&
+          <span>Download the files from the NYM service provider</span>
+        }
     </div>
   </>
 }

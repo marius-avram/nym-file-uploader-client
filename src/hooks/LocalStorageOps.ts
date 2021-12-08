@@ -1,9 +1,9 @@
 import Moment from 'moment';
 import { useCallback, useState } from 'react';
+import { useAppContext } from '../App.context';
 
 export function LocalStorageOps() {
-  // This should be in a context provider
-  const [updatedCount, setUpdatedCount] = useState<number>(0);
+  const { state: appState, setFileListUpdatedCount } = useAppContext();
   const FILES_METADATA = "files";
 
   const saveMd5Sum = useCallback((md5sum : string) => {
@@ -12,9 +12,9 @@ export function LocalStorageOps() {
     // Will save the date too, just to make the user aware when it uploaded the file
     filesMetadataJSON[md5sum] = Moment().format('MMMM Do YYYY, h:mm:ss a');
     localStorage.setItem(FILES_METADATA, JSON.stringify(filesMetadataJSON));
-    setUpdatedCount(updatedCount + 1)
+    setFileListUpdatedCount(appState.fileListUpdatedCount + 1)
   // eslint-disable-next-line
-  }, [setUpdatedCount]);
+  }, [appState.fileListUpdatedCount, setFileListUpdatedCount]);
 
   const getSavedFiles = useCallback(() => {
     let filesMetadataJSON : { [id: string]: string } = {};
@@ -27,8 +27,8 @@ export function LocalStorageOps() {
 
   const removeLocalStorageMetadata = useCallback(() => {
     localStorage.removeItem(FILES_METADATA);
-    setUpdatedCount(updatedCount + 1);
-  }, []);
+    setFileListUpdatedCount(appState.fileListUpdatedCount + 1)
+  }, [appState.fileListUpdatedCount, setFileListUpdatedCount]);
 
   const removeMd5Sum = useCallback((md5sum : string) => {
     let filesMetadataJSON : { [id: string]: string } = getSavedFiles();
@@ -36,11 +36,10 @@ export function LocalStorageOps() {
       delete filesMetadataJSON[md5sum];
     }
     localStorage.setItem(FILES_METADATA, JSON.stringify(filesMetadataJSON));
-    setUpdatedCount(updatedCount + 1)
-  }, [setUpdatedCount]);
+    setFileListUpdatedCount(appState.fileListUpdatedCount + 1);
+  }, [appState.fileListUpdatedCount, setFileListUpdatedCount]);
 
   return {
-    updatedCount,
     saveMd5Sum,
     getSavedFiles,
     removeLocalStorageMetadata,

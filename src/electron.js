@@ -11,7 +11,7 @@ mainWindow = new BrowserWindow({
         }
     });
 mainWindow.loadURL('http://localhost:3000');
-mainWindow.webContents.openDevTools();
+//mainWindow.webContents.openDevTools();
 mainWindow.on('closed', function () {
         mainWindow = null
     })

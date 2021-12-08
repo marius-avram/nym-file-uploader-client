@@ -2,6 +2,7 @@
 export class Operations {
   static WRITE_ENCRYPTED_FILE = 0x01;
   static READ_ENCRYPTED_FILE = 0x02;
+  static DELETE_ENCRYPTED_FILE = 0x03;
 }
 
 export function FileServiceProviderOps() {

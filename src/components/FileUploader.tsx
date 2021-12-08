@@ -27,7 +27,7 @@ export function FileUploader() {
   // Handler for receiving a file binary content
   useEffect(() => {
     handleReceivingReponse();
-  }, [binaryResponse])
+  }, [binaryResponse]);
 
   const createDownloadLink = useCallback((arrayBuffer: ArrayBuffer) => {
     const fileBlob = new  Blob([new Uint8Array(arrayBuffer)]);
@@ -44,7 +44,6 @@ export function FileUploader() {
   }, []);
 
   const handleReceivingReponse = useCallback(() => {
-    console.log("before successHandler");
     if (binaryResponse != null) {
       const decoder = new TextDecoder();
       const response = decoder.decode(binaryResponse);
@@ -89,6 +88,10 @@ export function FileUploader() {
     onDrop(e: React.DragEvent<HTMLDivElement>) {
       console.debug('Dropped files', e.dataTransfer.files);
     },
+    showUploadList: {
+      showDownloadIcon: false,
+      showRemoveIcon: false
+    }
   };
 
   const onEncryptionChange = () => {
